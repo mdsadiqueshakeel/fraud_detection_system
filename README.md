@@ -125,3 +125,65 @@ Each decision has associated costs:
 ---
 
 **Note**: This analysis assumes fraud cost of ₹10,000 and false alarm cost of ₹50. Adjust thresholds based on your institution's specific cost-benefit parameters.
+
+## Random Forest Evaluation
+
+The project also includes a Random Forest classifier (`models/random_forest.pkl`). Evaluation on the test set produced the following results.
+
+### Confusion Matrix
+```
+[[56861     3]
+ [   25    73]]
+```
+
+### Classification Report (Default Threshold: 0.5)
+```
+           precision    recall  f1-score   support
+
+         0       1.00      1.00      1.00     56,864
+         1       0.96      0.74      0.84        98
+
+   accuracy                           1.00     56,962
+   macro avg       0.98      0.87      0.92     56,962
+weighted avg       1.00      1.00      1.00     56,962
+```
+
+### ROC-AUC Score
+- **ROC-AUC Score**: 0.9529
+
+### Threshold Tuning Results (Random Forest)
+| Threshold | Precision | Recall | Business Loss |
+|-----------|-----------|--------|---------------|
+| 0.10      | 0.7414    | 0.8776 | ₹121,500     |
+| 0.20      | 0.8571    | 0.8571 | ₹140,700     |
+| 0.30      | 0.9205    | 0.8265 | ₹170,350     |
+| 0.40      | 0.9518    | 0.8061 | ₹190,200     |
+| 0.50      | 0.9605    | 0.7449 | ₹250,150     |
+| 0.60      | 0.9726    | 0.7245 | ₹270,100     |
+| 0.70      | 0.9701    | 0.6633 | ₹330,100     |
+| 0.80      | 0.9667    | 0.5918 | ₹400,100     |
+| 0.90      | 0.9583    | 0.4694 | ₹520,100     |
+
+### Insights
+- The Random Forest achieves strong precision for fraud detection while maintaining high overall accuracy.
+- The lowest business loss occurs at the lower thresholds (0.10), driven by higher recall; however, business preference for fewer false alarms may shift the chosen threshold.
+- Compare Random Forest and Logistic Regression results to pick a model and threshold aligned with your risk and cost preferences.
+
+## Model Comparison
+
+**Logistic Regression**
+- ROC-AUC: 0.972
+- Default (0.5) fraud recall: 92% (high recall), fraud precision: 0.06 (low)
+- Best observed business-loss: ₹122,250 at threshold 0.70
+
+**Random Forest**
+- ROC-AUC: 0.9529
+- Default (0.5) fraud recall: 74%, fraud precision: 0.96 (high)
+- Best observed business-loss: ₹121,500 at threshold 0.10
+
+**Recommendation**
+- If the primary objective is to minimize monetary loss (given the assumed costs), **Random Forest at threshold 0.10** yields the lowest business loss (₹121,500) on the evaluated test set.
+- If the priority is maximizing detection robustness and achieving higher ROC-AUC / recall at a conservative operating point, **Logistic Regression** (threshold ≈ 0.70) is preferable.
+- Final model/threshold choice should reflect business tolerance for false alarms versus missed fraud; consider running a loss-vs-threshold plot and a small production trial to validate operational impacts.
+
+If you'd like, I can add a short script to compute and plot business loss vs threshold for both models and include the plot in the README.

@@ -1,6 +1,5 @@
 import joblib
 import numpy as np
-
 from sklearn.metrics import(
     confusion_matrix,
     classification_report,
@@ -11,29 +10,29 @@ from sklearn.metrics import(
 
 from data_loader import load_data, split_data
 
-fraud_cost = 10000
-false_alarm_cost = 50
+
+fraud_cost=10000
+false_alarm_cost=50
 
 
 def main():
     df = load_data("../data/creditcard.csv")
-    X_train, X_test, y_train, y_test = split_data(df)
+    X_train,X_test,y_train,y_test = split_data(df)
 
-    model = joblib.load("../models/logistic_model.pkl")
+    model = joblib.load("../models/random_forest.pkl")
 
     y_pred = model.predict(X_test)
     y_prob = model.predict_proba(X_test)[:,1]
-    
-    print("confusion matrix :")
-    print(confusion_matrix(y_test, y_pred))
 
+
+    print("Confusion Matrix:")
+    print(confusion_matrix(y_test, y_pred))
 
     print("\nClassification Report:")
     print(classification_report(y_test, y_pred))
 
     print("\nROC-AUC Score:")
     print(roc_auc_score(y_test, y_prob))
-
 
     print("\n--- Threshold Tuning ---")
     thresholds = np.linspace(0.1,0.9,9)
@@ -51,6 +50,7 @@ def main():
         print(f"Precision: {precision:.4f}")
         print(f"Recall: {recall:.4f}")
         print(f"Business Loss: ₹{loss}")
+
 
 if __name__ == "__main__":
     main()
