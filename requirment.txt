@@ -1,1 +1,1 @@
-pandas numpy scikit-learn matplotlib seaborn joblib
+pandas numpy scikit-learn matplotlib seaborn joblib xgboost shap
