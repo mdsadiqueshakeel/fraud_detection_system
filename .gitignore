@@ -1,0 +1,26 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Model files (large binary files)
+models/*.pkl
+
+# Dataset (large file, don’t upload to GitHub)
+data/creditcard.csv
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
