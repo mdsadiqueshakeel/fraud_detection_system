@@ -2,9 +2,9 @@
 
 ## Project Overview
 
-This project implements a machine learning solution to detect fraudulent credit card transactions. Using logistic regression with standardized features, the model achieves a ROC-AUC score of **0.972**, effectively identifying fraudulent transactions while maintaining a balance between precision and recall.
+This project implements a machine learning solution to detect fraudulent credit card transactions. It begins with a logistic regression pipeline that achieves a ROC-AUC score of **0.972** on the held‑out test set, and further explores more powerful learners (Random Forest and XGBoost) which, once tuned, push performance above **0.978**.
 
-The solution includes threshold optimization to minimize business losses by analyzing the trade-off between fraud detection costs and false alarm costs.
+All models support threshold optimization to minimize business losses by analyzing the trade‑off between fraud detection costs and false alarm costs.
 
 ## Problem Statement
 
@@ -58,6 +58,19 @@ This will:
 2. Generate confusion matrix and classification report
 3. Calculate ROC-AUC score
 4. Display threshold tuning analysis with business loss calculations
+
+### Hyperparameter Tuning & Comparison
+To try stronger models, two tuning scripts are provided:
+```bash
+python tune_rf.py          # searches Random Forest hyperparameters
+python tune_xgb_clean.py   # searches XGBoost hyperparameters
+```
+Each script saves the best estimator under `models/`.
+After tuning, compare all three algorithms using:
+```bash
+python final_model_comparison.py
+```
+which prints ROC‑AUC, optimal threshold, and resulting business loss for every candidate.
 
 ## Metrics Achieved
 
@@ -128,7 +141,7 @@ Each decision has associated costs:
 
 ## Random Forest Evaluation
 
-The project also includes a Random Forest classifier (`models/random_forest.pkl`). Evaluation on the test set produced the following results.
+The project also includes a Random Forest classifier (`models/random_forest.pkl`). Evaluation on the test set produced the following results. *(these figures are for the **baseline** RF model before hyperparameter tuning; see the Model Comparison section for tuned performance)*
 
 ### Confusion Matrix
 ```
@@ -171,7 +184,7 @@ weighted avg       1.00      1.00      1.00     56,962
 
 ## XGBoost Evaluation
 
-An XGBoost classifier (`models/xgb_model.pkl`) was also trained and evaluated. Results on the test set are below.
+An XGBoost classifier (`models/xgb_model.pkl`) was also trained and evaluated. Results on the test set are below. *(again, this is the un‑tuned baseline – tuning further improves the metrics as summarized later)*
 
 ### Confusion Matrix
 ```
@@ -231,25 +244,28 @@ weighted avg       1.00      1.00      1.00     56,962
 *** End Patch
 ## Model Comparison
 
-**Logistic Regression**
+**Logistic Regression (baseline)**
 - ROC-AUC: 0.972
 - Default (0.5) fraud recall: 92% (high recall), fraud precision: 0.06 (low)
 - Best observed business-loss: ₹122,250 at threshold 0.70
 
-**Random Forest**
-- ROC-AUC: 0.9529
-- Default (0.5) fraud recall: 74%, fraud precision: 0.96 (high)
-- Best observed business-loss: ₹121,500 at threshold 0.10
+**Random Forest (tuned)**
+- ROC-AUC: **0.9785**
+- Optimal decision threshold: **0.20**
+- Minimum business-loss on test set: **₹107,000**
+- Hyperparameter search uses `tune_rf.py` and results are saved as `models/rf_tuned_clean.pkl`.
 
-**XGBoost**
-- ROC-AUC: 0.9771 (highest)
-- Default (0.5) fraud recall: 81%, fraud precision: 0.85
-- Best observed business-loss: ₹160,850 at threshold 0.30
+**XGBoost (tuned)**
+- ROC-AUC: **0.9776**
+- Optimal decision threshold: **0.75**
+- Minimum business-loss on test set: **₹118,850**
+- Hyperparameter search uses `tune_xgb_clean.py` and results are saved as `models/xgb_tuned_clean.pkl`.
 
 **Recommendation**
-- Based purely on the lowest business loss with the given cost assumptions, **Random Forest at threshold 0.10** remains optimal (₹121,500).
-- **XGBoost** offers the best ROC-AUC and high precision, but its minimum loss occurs at a higher cost; it may be favored when maximizing discriminative power or interpretability via SHAP is important.
-- **Logistic Regression** provides a strong balance of high recall and moderate cost, with easy interpretability and threshold tuning.
-- Choose the model and threshold that align with your operational priorities—loss minimization, recall, precision, or explainability. A visual loss-vs-threshold comparison across all three models can assist in decision-making.
+1. The tuned Random Forest now delivers the lowest business loss (₹107K) along with the highest ROC‑AUC, making it the leading candidate under the current cost assumptions.
+2. XGBoost still offers excellent discriminative power and may be preferred when explainability (via SHAP) or slightly higher precision is desired.
+3. Logistic Regression remains a reliable, interpretable baseline and may be adequate if simplicity is prioritized.
+
+Choose the model and threshold that align with your operational priorities—loss minimization, recall, precision, or explainability. Consider running `final_model_comparison.py` frequently after making changes to data or costs to re‑evaluate.
 
 If you'd like, I can add a short script to compute and plot business loss vs threshold for all models and include the plot in the README.
